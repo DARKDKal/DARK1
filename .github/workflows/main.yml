@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>جدول الدراسة والواجبات</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #121212; /* خلفية داكنة */
+            color: #e0e0e0; /* نص فاتح */
+            margin: 0;
+            padding: 20px;
+        }
+        h1, h3 {
+            text-align: center;
+            color: #ffffff; /* نص أبيض للعناوين */
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #444; /* حدود داكنة */
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #4CAF50; /* لون خلفية أخضر للرؤوس */
+            color: white;
+        }
+        tr:hover {
+            background-color: #333; /* تغيير لون الصف عند التمرير */
+        }
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.9em;
+            color: #bbb; /* نص رمادي فاتح في الفوتر */
+        }
+        button {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4CAF50; /* لون زر أخضر */
+            color: white; /* نص أبيض على الزر */
+            border: none; /* إزالة الحدود */
+            cursor: pointer; /* تغيير شكل المؤشر */
+        }
+        button:hover {
+            background-color: #45a049; /* لون أغمق عند التمرير */
+        }
+        .form-container {
+            margin-top: 20px;
+            text-align: center;
+        }
+        select, input {
+            margin: 5px;
+            padding: 5px;
+            font-size: 16px;
+            width: calc(20% - 12px); /* عرض الحقول */
+            background-color: #333; /* خلفية داكنة للحقول */
+            color: #e0e0e0; /* نص فاتح للحقول */
+            border: 1px solid #444; /* حدود داكنة */
+        }
+        input::placeholder {
+            color: #bbb; /* نص رمادي فاتح في الحقول */
+        }
+        .admin-container {
+            display: none; /* إخفاء حاوية التعديل حتى يتم إدخال كلمة السر */
+            text-align: center;
+        }
+        .alert {
+            margin-top: 20px;
+        }
+    </style>
+    <script>
+        const adminPassword = '7777'; // كلمة السر الجديدة
+
+        function checkPassword(action) {
+            const passwordInput = document.getElementById('admin-password').value;
+            if (passwordInput === adminPassword) {
+                switch(action) {
+                    case 'add':
+                        addRow();
+                        break;
+                    case 'clear':
+                        clearTable();
+                        break;
+                    case 'edit':
+                        alert('تعديل الصف غير مفعل حالياً.');
+                        break;
+                    default:
+                        break;
+                }
+                document.getElementById('admin-password-container').style.display = 'none';
+                document.getElementById('admin-password').value = ''; // إعادة تعيين الحقل
+            } else {
+                alert('كلمة السر غير صحيحة!');
+            }
+        }
+
+        function addRow() {
+            const subject = document.getElementById('subject').value;
+            const day = document.getElementById('day').value;
+            const time = document.getElementById('time').value;
+            const homework = document.getElementById('homework').value;
+
+            if (subject && day && time && homework) {
+                const newRow = {
+                    subject: subject,
+                    day: day,
+                    time: time,
+                    homework: homework
+                };
+
+                const currentData = JSON.parse(localStorage.getItem('schedule')) || [];
+                currentData.push(newRow); // إضافة صف جديد
+
+                localStorage.setItem('schedule', JSON.stringify(currentData));
+                renderTable();
+                clearInputs();
+                alert('تم إضافة المادة بنجاح!');
+            } else {
+                alert('يرجى تعبئة جميع الحقول');
+            }
+        }
+
+        function clearTable() {
+            localStorage.removeItem('schedule');
+            renderTable();
+            alert('تم تفريغ الجدول بنجاح!');
+        }
+
+        function renderTable() {
+            const tableBody = document.getElementById('table-body');
+            tableBody.innerHTML = '';
+
+            const currentData = JSON.parse(localStorage.getItem('schedule')) || [];
+            currentData.forEach(row => {
+                const newRow = `
+                    <tr>
+                        <td>${row.subject}</td>
+                        <td>${row.day}</td>
+                        <td>${row.time}</td>
+                        <td>${row.homework}</td>
+                    </tr>
+                `;
+                tableBody.innerHTML += newRow;
+            });
+        }
+
+        function clearInputs() {
+            document.getElementById('subject').value = '';
+            document.getElementById('day').value = '';
+            document.getElementById('time').value = '';
+            document.getElementById('homework').value = '';
+        }
+
+        function showAdminOptions(action) {
+            document.getElementById('admin-password-container').style.display = 'block';
+            document.getElementById('admin-password').setAttribute('data-action', action);
+        }
+
+        window.onload = renderTable;
+    </script>
+</head>
+<body>
+
+<h1>جدول الدراسة والواجبات</h1>
+
+<!-- زر لتفريغ الجدول -->
+<button class="btn btn-danger" onclick="showAdminOptions('clear')">تفريغ الجدول</button>
+
+<!-- الجدول -->
+<table class="table table-dark">
+    <thead>
+        <tr>
+            <th>المادة</th>
+            <th>اليوم</th>
+            <th>الوقت</th>
+            <th>الواجبات</th>
+        </tr>
+    </thead>
+    <tbody id="table-body">
+        <!-- سيتم ملء الجدول بواسطة JavaScript -->
+    </tbody>
+</table>
+
+<!-- نموذج لإضافة مواد جديدة -->
+<div class="form-container">
+    <h3>إضافة مادة جديدة</h3>
+    <select id="subject" required>
+        <option value="" disabled selected>اختر المادة</option>
+        <option value="عربي">عربي</option>
+        <option value="انقليزي">انقليزي</option>
+        <option value="رياضيات">رياضيات</option>
+        <option value="دين">دين</option>
+        <option value="فيزياء">فيزياء</option>
+        <option value="كيمياء">كيمياء</option>
+        <option value="جغرافية">جغرافية</option>
+        <option value="وطنية">وطنية</option>
+        <option value="تاريخ">تاريخ</option>
+        <option value="علوم الأحياء">علوم الأحياء</option>
+        <option value="علوم الأرض">علوم الأرض</option>
+        <option value="حاسوب">حاسوب</option>
+        <option value="مالية">مالية</option>
+    </select>
+    <select id="day" required>
+        <option value="" disabled selected>اختر اليوم</option>
+        <option value="السبت">السبت</option>
+        <option value="الأحد">الأحد</option>
+        <option value="الاثنين">الاثنين</option>
+        <option value="الثلاثاء">الثلاثاء</option>
+        <option value="الأربعاء">الأربعاء</option>
+        <option value="الخميس">الخميس</option>
+        <option value="الجمعة">الجمعة</option>
+    </select>
+    <input type="time" id="time" required>
+    <input type="text" id="homework" placeholder="الواجب" required>
+    <button class="btn btn-success" onclick="showAdminOptions('add')">إضافة المادة</button>
+</div>
+
+<!-- حاوية إدخال كلمة المرور -->
+<div class="form-container" id="admin-password-container" style="display: none;">
+    <h3>لإجراء التعديلات، يرجى إدخال كلمة السر</h3>
+    <input type="password" id="admin-password" placeholder="كلمة السر" required>
+    <button class="btn btn-primary" onclick="checkPassword(document.getElementById('admin-password').getAttribute('data-action'))">تأكيد</button>
+</div>
+
+<div class="footer">
+    <p>تأكد من مراجعة الجدول بانتظام وإضافة الواجبات الجديدة!</p>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
